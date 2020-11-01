@@ -16,3 +16,7 @@ The game is very simple to play because the player must not hit the up and down 
 # paypal
 
 paypal.me/kelvin.ynggal@gmail.com
+
+#BTC
+
+3LKLWWts1yTwPNYELkg1dokPpLkLnToDkF
