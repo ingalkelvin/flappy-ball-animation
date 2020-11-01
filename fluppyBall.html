@@ -1,0 +1,276 @@
+<!-- Ingal, Kelvin M. -->
+
+<!doctype html>
+	<head>
+		<meta charset="utf-8">
+		<title> FLUPPY BALL </title>
+		<link href="style.css" rel="stylesheet" type="text/css">
+	</head>
+	<body>
+	
+		<script src="utils.js"></script>
+		<script src="ball.js"></script>
+		<script src="Bars.js"></script>
+		<script src="DesignBar.js"></script>
+
+		<center> <b><label>FLUPPY BALL</label></b><br>
+		<canvas id="canvas" width="1300" height="600"> </canvas> 
+		<br>
+		<b><label color="white">Points: </label></b>
+		<input type="text" id="text"  placeholder="Press Up arrow Key To Start">
+		
+		<input type="button" value = "Play Again" onclick="PlayGame()">
+
+		</center>
+
+		<script>
+			var playAgain = false;
+
+			function PlayGame() {
+
+				playAgain = true;
+			}
+
+			window.onload = function() {
+
+				var canvas = document.getElementById("canvas");
+				var text = document.getElementById('text');
+				var context = canvas.getContext('2d');
+				var ballBird = new Ball();
+
+				var designBarUp = new DesignBar(), designBarDown = new DesignBar();
+						
+				var barUp;
+				var barDown;
+				var arrayBarUp = [];
+				var arrayBarDown = [];
+				var numArray = 5;
+				var vx = 4;
+				var vy = 0;
+				var gravity = .3;
+				var scoreCounter = 0;
+				var startGame = false;
+				var mouse = utils.captureMouse(canvas);
+				var flameDuration = 0, invulnerableCounter = 10, invulnerableCounterTemp=0;
+
+				var randomPositionBarsUp = 	 [50, 20, -10, -40, -70, -100, -130, -160, -190, -220, -250];
+				var randomPositionBarsDown = [250, 220, 190, 160, 130, 100, 70, 40, -10, -20, -50];
+				var barDiff = [0, 20, 40]; 
+
+				ballBird.x = canvas.width/2;
+				ballBird.y = canvas.height/2;
+				
+				designBarUp.x = designBarDown.x = canvas.width/2;
+				designBarUp.y = 10;
+				designBarDown.y = canvas.height - 10;
+
+				//function for creating Bar
+				function createBars() {
+
+					var xDiff = canvas.width + 300;
+
+					for(var i = 0 ; i<numArray; i++){
+
+						barUp = new BarUp();
+						barUp.id = "BarUp: "+i;
+						barUp.x = xDiff;
+						barUp.y = canvas.height/2;
+						var pos = Math.round(Math.random()*10);
+						barUp.heightUp = randomPositionBarsUp[pos]+barDiff[Math.round(Math.random()*2)];
+
+						barDown = new BarDown();
+						barDown.id = "BarDown: "+i;
+						barDown.x = xDiff;
+						barDown.y = canvas.height/2;
+						barDown.heightDown = randomPositionBarsDown[pos];
+
+						xDiff+=300;
+
+						arrayBarUp.push(barUp);
+						arrayBarDown.push(barDown);
+					}
+				}
+
+				createBars();
+
+				// draw each bar
+				function draw(bar) {
+
+					if(bar.x-2 == ballBird.x && ballBird.color != 'gray') {
+						
+							scoreCounter+=.5;
+					}
+					
+					bar.x -= vx;
+
+					bar.draw(context); 
+				}
+
+				// regenerate the bar
+				function resetPosition() {
+
+						for(var i=0; i<numArray; i++)
+						{
+
+							if(arrayBarUp[i].x <= 0)
+							{
+								var pos = Math.round(Math.random()*10);
+								arrayBarUp[i].heightUp = randomPositionBarsUp[pos]+barDiff[Math.round(Math.random()*2)];
+								arrayBarDown[i].heightDown = randomPositionBarsDown[pos];
+								arrayBarUp[i].x = canvas.width+200;
+								arrayBarDown[i].x = canvas.width+200;
+							}
+						}
+				}
+				// function for checking if the ball and box is collide
+				function checkIfOver(bar) {
+
+					if(utils.intersects(ballBird.getBounds(), bar.getBounds()) && flameDuration == 0) { // if the ball is collide and ball is not fire the game is over
+
+						ballBird.color = "gray";
+					}
+
+				}
+
+				// event for up arrow and space bar key
+				window.addEventListener('keyup',function(event) {
+					if(event.keyCode == 32) {
+						if(ballBird.color == "blue")
+							vy -= 7;
+						startGame = true;
+					}
+					
+					if(event.keyCode == 38) {
+						if(ballBird.color == "blue")
+							vy -= 7;
+						startGame = true;	
+						
+					}
+				},false);
+
+				canvas.addEventListener('click',function(event) {
+				
+						if(ballBird.color == "blue"){
+							vy -= 7;
+							startGame = true;
+						}
+				},false);
+			
+				(function drawFrame() {
+					window.requestAnimationFrame(drawFrame, canvas);
+					context.clearRect(0,0,canvas.width,canvas.height);
+
+					// reset the game
+
+					if(playAgain) {
+
+						arrayBarUp.splice(0, arrayBarUp.length);
+						arrayBarDown.splice(0, arrayBarDown.length);
+						createBars();
+						scoreCounter = 0;
+						vx = 0;
+						startGame = false;
+						ballBird.x = canvas.width/2;
+						ballBird.y = canvas.height/2;
+						ballBird.color = "blue";
+						gravity = .5;
+						vy = 0;
+						ballBird.rotation = 0 * Math.PI / 180;
+						playAgain = false;
+
+					}
+					
+		
+
+					// start the game
+
+					if(startGame) {
+						vx = 4;
+						gravity = .3;
+					}
+					else {
+
+						gravity = 0;
+						vy = 0;
+						vx = 0;
+					}
+
+					vy += gravity;
+					ballBird.y += vy;
+
+					// check the Boundaries
+					if(ballBird.y-ballBird.radius*2 > designBarDown.y) {
+
+						ballBird.color = "gray";
+					}
+					else if(ballBird.y-ballBird.radius < designBarUp.y) {
+
+						vy = 0;
+						ballBird.y = designBarUp.y+ballBird.radius*2;
+					}
+
+					/// check if the ball collide the bar
+					arrayBarUp.forEach(checkIfOver);
+					arrayBarDown.forEach(checkIfOver);
+
+
+					if(!startGame) {
+
+						text.value ="";
+					}
+					else if(ballBird.color != "gray")
+					{
+						text.value = "Score: "+scoreCounter;
+
+					}
+					else {
+
+						vx = 0;
+						gravity = 1;
+						ballBird.rotation = 90*Math.PI/180;
+						text.value ="Game Over! Final Score: "+scoreCounter;
+					}
+					
+					resetPosition();
+					
+					// the ball will turns on fire and the ball is invulnerable
+					if(scoreCounter%invulnerableCounter==0 && scoreCounter != 0) {
+
+							flameDuration = 350;
+							invulnerableCounterTemp += (10+invulnerableCounter);
+							invulnerableCounter += invulnerableCounterTemp;
+					}
+
+					if(flameDuration != 0) {
+
+							flameDuration--;
+							if(flameDuration%2==1)
+							{
+								ballBird.showFlame = true;
+							}
+							else {
+								ballBird.showFlame = false;
+							}
+						}
+						else {
+							ballBird.showFlame = false;
+					}
+
+
+					// draw each object
+
+			
+					arrayBarUp.forEach(draw);
+					arrayBarDown.forEach(draw);	
+					ballBird.draw(context);	
+					designBarUp.draw(context);		
+					designBarDown.draw(context);	
+				}());
+
+			};
+			
+		</script>
+		
+	</body>
+
+</html>

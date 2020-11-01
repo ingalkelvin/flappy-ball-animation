@@ -1,0 +1,12 @@
+body {
+background-color:#000000;
+
+}
+#canvas {
+background-color:#ABCDEF;
+
+}
+label {
+color: #98FB98;
+}
+input { font-size: 15px; }
