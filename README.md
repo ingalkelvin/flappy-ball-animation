@@ -1,5 +1,7 @@
 # flappy-ball-animation
 
+<img src="https://github.com/ingalkelvin/flappy-ball-animation/blob/main/flappy.png">
+
 flappy ball is a javascript animation program
 
 # Controls
